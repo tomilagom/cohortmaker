@@ -64,7 +64,7 @@ def display_cohort_table():
 
   # Add the maximum value of totalCustomers as a new column
   cohort_table2 = cohort_table.assign(total=max_totalCustomers)
-    cohort_table2=cohort_table2.sort_values('date',ascending=False)
+  cohort_table2=cohort_table2.sort_values('date',ascending=False)
   # Convert the dataframe to an HTML table
   html_table = cohort_table2.to_html()
 
