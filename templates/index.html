@@ -1,0 +1,162 @@
+<html>
+   <head>
+      <style>
+      /* Style the table */
+      .dataframe {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      /* Style the table cells */
+      .dataframe td, .dataframe th {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+      }
+      /* Style the table rows */
+      .dataframe tr:nth-child(even) {
+        background-color: #dddddd;
+      }
+      /* Style the table headings */
+      .dataframe th {
+        background-color: #333333;
+        color: white;
+      }
+      /* Style the cell values */
+      .dataframe td {
+        font-family: sans-serif;
+        font-size: 14px;
+      }
+      /* Style the retention rate cells */
+      .dataframe td.retention-rate {
+        /* Style the cell value based on the retention rate */
+        color: #009900;
+      }
+      .dataframe td.retention-rate[data-retention-rate="0.5"] {
+        color: #ffff00;
+      }
+      .dataframe td.retention-rate[data-retention-rate="0.25"] {
+        color: #ff9900;
+      }
+      .dataframe td.retention-rate[data-retention-rate="0"] {
+        color: #ff0000;
+      }
+      /* Style the selected table rows */
+    .dataframe tr.selected {
+      background-color: #666666;
+}
+    </style>
+      <script>
+  // Add an event listener to the table cells
+  document.addEventListener('mouseover', function(event) {
+    // Check if the clicked element is a table cell
+    if (event.target.tagName === 'TD') {
+      // Get the table cell element
+      var cell = event.target;
+      // Get the table row element
+      var row = cell.parentNode;
+      // Toggle the selected class on the table row
+      row.classList.toggle('selected');
+    }
+  });
+</script>
+      <script>
+   function handleImport() {
+    // Get the file input element
+    const fileInput = document.querySelector('input[type="file"]');
+  
+    // Check if a file has been selected
+    if (!fileInput.files.length) {
+      alert('Please select a CSV file to import');
+      return;
+    }
+  
+    // Get the selected file
+    const file = fileInput.files[0];
+  
+    // Read the file as a text string
+    const reader = new FileReader();
+    reader.readAsText(file);
+  
+    // Handle the file read event
+    reader.onload = (event) => {
+      // The file contents are stored in the `result` property of the event
+      const csv = event.target.result;
+  
+      // Store the CSV file in local storage
+      localStorage.setItem('csv', csv);
+      // Add the CSV file to the form data
+    };
+  }
+
+
+</script>
+      <script>
+  function displayDocument() {
+  // Get the CSV file from local storage
+  const csv = localStorage.getItem('csv');
+
+  // Split the CSV string into an array of rows
+  const rows = csv.split('\n');
+
+  // Create an empty array to store the document
+  const document = [];
+
+  // Iterate over the rows and add them to the document
+  rows.forEach((row) => {
+    // Split the row into an array of values
+    const values = row.split(',');
+
+    // Add the values to the document
+    document.push(values);
+  });
+
+  // Get the table element
+  const table = window.document.getElementById('document-table');
+
+  // Clear the table contents
+  table.innerHTML = '';
+
+  // Iterate over the rows in the document and add them to the table
+  document.forEach((row) => {
+    const tr = window.document.createElement('tr');
+    row.forEach((cell) => {
+      const td = window.document.createElement('td');
+      td.textContent = cell;
+      tr.appendChild(td);
+    });
+    table.appendChild(tr);
+  });
+
+}
+
+</script>
+  </head>
+  <body>
+    <input id='csv-file' type="file" accept=".csv">
+    <button onclick="handleImport()">Import CSV</button>
+
+<button id="display-cohort-table">Display processed data</button>
+<script>
+    document.getElementById('display-cohort-table').onclick = function() {
+      // Get the file from local storage
+      var csv = localStorage.getItem('csv');
+      // Send the POST request with the FormData object as the body
+      fetch('/display_cohort_table', {
+        method: 'POST',
+        headers: {
+    'Content-Type': 'application/json'},
+        body: JSON.stringify({csv: csv})
+      })
+          .then(response => response.text())
+          .then(responseText => {
+            document.getElementById('cohort-table').innerHTML = responseText;
+          });
+    }
+</script>
+    
+
+
+<div id="cohort-table"></div>
+    
+  </body>
+</html>
