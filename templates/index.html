@@ -58,9 +58,9 @@
       row.classList.toggle('selected');
     }
   });
-</script>
-      <script>
-   function handleImport() {
+    </script>
+    <script>
+  function handleImport() {
     // Get the file input element
     const fileInput = document.querySelector('input[type="file"]');
   
@@ -81,82 +81,34 @@
     reader.onload = (event) => {
       // The file contents are stored in the `result` property of the event
       const csv = event.target.result;
-  
+      const data = Papa.parse(csv);
       // Store the CSV file in local storage
-      localStorage.setItem('csv', csv);
-      // Add the CSV file to the form data
-    };
+      localStorage.setItem('csv', data);
+      console.log(data);
+    // Send the POST request with the FormData object as the body
+    fetch('/display_cohort_table', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({csv: data})
+    })
+        .then(response => response.text())
+        .then(responseText => {
+          document.getElementById('cohort-table').innerHTML = responseText;
+        });    };
+
   }
 
 
 </script>
-      <script>
-  function displayDocument() {
-  // Get the CSV file from local storage
-  const csv = localStorage.getItem('csv');
-
-  // Split the CSV string into an array of rows
-  const rows = csv.split('\n');
-
-  // Create an empty array to store the document
-  const document = [];
-
-  // Iterate over the rows and add them to the document
-  rows.forEach((row) => {
-    // Split the row into an array of values
-    const values = row.split(',');
-
-    // Add the values to the document
-    document.push(values);
-  });
-
-  // Get the table element
-  const table = window.document.getElementById('document-table');
-
-  // Clear the table contents
-  table.innerHTML = '';
-
-  // Iterate over the rows in the document and add them to the table
-  document.forEach((row) => {
-    const tr = window.document.createElement('tr');
-    row.forEach((cell) => {
-      const td = window.document.createElement('td');
-      td.textContent = cell;
-      tr.appendChild(td);
-    });
-    table.appendChild(tr);
-  });
-
-}
-
+     <script src="https://unpkg.com/papaparse@latest/papaparse.min.js">
 </script>
   </head>
   <body>
     <input id='csv-file' type="file" accept=".csv">
     <button onclick="handleImport()">Import CSV</button>
 
-<button id="display-cohort-table">Display processed data</button>
-<script>
-    document.getElementById('display-cohort-table').onclick = function() {
-      // Get the file from local storage
-      var csv = localStorage.getItem('csv');
-      // Send the POST request with the FormData object as the body
-      fetch('/display_cohort_table', {
-        method: 'POST',
-        headers: {
-    'Content-Type': 'application/json'},
-        body: JSON.stringify({csv: csv})
-      })
-          .then(response => response.text())
-          .then(responseText => {
-            document.getElementById('cohort-table').innerHTML = responseText;
-          });
-    }
-</script>
     
+<table id="cohort-table"></table>
 
-
-<div id="cohort-table"></div>
-    
   </body>
 </html>
